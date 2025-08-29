@@ -13,7 +13,24 @@ export default function AdminDashboard() {
       }
     }
   }, []);
-  const [data, setData] = useState<any>(null);
+  type DashboardData = {
+    porServico?: Record<string, { quantidade: number; total: number }>;
+    totalAppointments?: number;
+    faturamento?: number;
+    appointments?: Array<{
+      id: number;
+      nome: string;
+      email: string;
+      telefone: string;
+      servico: string;
+      data: string;
+      horario: string;
+      pessoas: number;
+      observacoes?: string;
+      status: string;
+    }>;
+  };
+  const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState<string|null>(null);
 
@@ -50,7 +67,7 @@ export default function AdminDashboard() {
           <div className="w-full md:w-1/2">
             <span className="block text-sm text-gray-500 mb-2">Gráfico: Agendamentos por serviço</span>
             <div className="flex items-end gap-2 h-24">
-              {Object.entries(data.porServico).map(([nome, info]: any) => (
+              {Object.entries(data.porServico).map(([nome, info]) => (
                 <div key={nome} className="flex flex-col items-center justify-end h-full">
                   <div style={{height: `${info.quantidade * 20}px`}} className="w-8 bg-yellow-400 rounded-t shadow flex items-end justify-center">
                     <span className="text-xs text-white font-bold pb-1">{info.quantidade}</span>
@@ -100,7 +117,7 @@ export default function AdminDashboard() {
             <span className="text-lg font-bold text-yellow-700 block mb-4">Agendamentos do dia</span>
             {data?.appointments?.length ? (
               <ul className="divide-y divide-yellow-100">
-                {data.appointments.map((a: any) => (
+                {data.appointments.map((a) => (
                   <li key={a.id} className="py-4">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                       <div>

@@ -22,8 +22,8 @@ export async function GET(req: NextRequest) {
   const totalAppointments = appointments.length;
   // Faturamento previsto: soma apenas agendamentos não cancelados e multiplica pelo partySize
   const faturamento = appointments
-    .filter((a: any) => a.status !== 'cancelled')
-    .reduce((sum: number, a: any) => sum + ((a.service.priceCents || 0) * (a.partySize || 1)), 0);
+    .filter((a) => a.status !== 'cancelled')
+    .reduce((sum: number, a) => sum + ((a.service.priceCents || 0) * (a.partySize || 1)), 0);
   // Distribuição por serviço (todos do dia)
   const porServico: Record<string, { quantidade: number; total: number }> = {};
   for (const a of appointments) {
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
     totalAppointments,
     faturamento,
     porServico,
-    appointments: appointments.map((a: any) => ({
+    appointments: appointments.map((a) => ({
       id: a.id,
       nome: a.customerName,
       email: a.customerEmail,

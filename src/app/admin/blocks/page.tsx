@@ -13,7 +13,15 @@ export default function BlocksAdmin() {
     }
   }, []);
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [blocks, setBlocks] = useState<any[]>([]);
+  type Block = {
+    id: number;
+    date: string;
+    startTime: string;
+    endTime: string;
+    reason?: string;
+    createdAt?: string;
+  };
+  const [blocks, setBlocks] = useState<Block[]>([]);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [reason, setReason] = useState("");

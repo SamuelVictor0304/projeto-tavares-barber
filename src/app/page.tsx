@@ -66,7 +66,8 @@ export default function Home() {
   const [telefone, setTelefone] = useState("");
   const [email, setEmail] = useState("");
   const [servico, setServico] = useState("");
-  const [servicos, setServicos] = useState<{ id: string, name: string }[]>([]);
+  type Service = { id: string; name: string };
+  const [servicos, setServicos] = useState<Service[]>([]);
   const [qtdPessoas, setQtdPessoas] = useState("1");
   const [obs, setObs] = useState("");
   const [loading, setLoading] = useState(false);
