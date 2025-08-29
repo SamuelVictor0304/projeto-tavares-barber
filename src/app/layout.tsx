@@ -23,11 +23,50 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+    <html lang="pt-BR">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 min-h-screen`}> 
+        <div className="flex min-h-screen">
+          {/* Sidebar */}
+          <aside className="w-64 bg-white border-r flex flex-col justify-between py-6 px-4">
+            <div>
+              <div className="flex items-center gap-2 mb-8">
+                <span className="bg-yellow-400 rounded-lg p-2">
+                  <svg width="32" height="32" fill="none"><rect width="32" height="32" rx="8" fill="#FFD600"/><text x="16" y="22" textAnchor="middle" fontSize="18" fontWeight="bold" fill="#222">✂️</text></svg>
+                </span>
+                <span className="font-bold text-lg text-gray-800">Tavares Barber</span>
+              </div>
+              <nav className="flex flex-col gap-2">
+                <a href="/" className="py-2 px-3 rounded hover:bg-yellow-100 font-medium text-gray-700">Agendamentos</a>
+                <a href="/novo" className="py-2 px-3 rounded hover:bg-yellow-100 font-medium text-gray-700">Novo Agendamento</a>
+                <a href="/servicos" className="py-2 px-3 rounded hover:bg-yellow-100 font-medium text-gray-700">Serviços</a>
+                <div className="mt-6 border-t pt-4">
+                  <span className="text-xs text-red-500 font-semibold">ÁREA PRIVADA</span>
+                  <a href="/barbeiro" className="py-2 px-3 rounded hover:bg-red-100 font-medium text-red-600">Área do Barbeiro</a>
+                  <a href="/bloqueios" className="py-2 px-3 rounded hover:bg-red-100 font-medium text-red-600">Bloqueios</a>
+                </div>
+                <div className="mt-6 border-t pt-4">
+                  <span className="text-xs text-yellow-600 font-semibold">ESTATÍSTICAS HOJE</span>
+                  <div className="flex flex-col gap-1 mt-2">
+                    <span className="flex items-center gap-2 text-green-600"><span className="bg-green-100 rounded-full w-5 h-5 flex items-center justify-center">📅</span>Agendamentos</span>
+                    <span className="flex items-center gap-2 text-blue-600"><span className="bg-blue-100 rounded-full w-5 h-5 flex items-center justify-center">⏰</span>Próximo</span>
+                  </div>
+                </div>
+              </nav>
+            </div>
+            <footer className="text-xs text-gray-400 mt-8">© 2025 Tavares Barber</footer>
+          </aside>
+          {/* Main content */}
+          <main className="flex-1 flex flex-col">
+            {/* Top bar */}
+            <header className="bg-white shadow px-8 py-4 flex items-center justify-between">
+              <h1 className="text-2xl font-bold text-gray-800">Agendamentos</h1>
+              <span className="text-sm text-gray-500">Clique em uma data no calendário para ver os detalhes</span>
+            </header>
+            <section className="flex-1 p-8">
+              {children}
+            </section>
+          </main>
+        </div>
       </body>
     </html>
   );

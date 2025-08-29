@@ -3,10 +3,61 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
+}
+
+model BarberSettings {
+  id                 Int      @id @default(1)
+  shopName           String   @default("Tavares Barber")
+  barberEmail        String   @default("samuel.vsp12@gmail.com")
+  businessHours      Json
+  slotDurationMinutes Int     @default(40)
+  timezone           String   @default("America/Sao_Paulo")
+}
+
+model Service {
+  id           Int     @id @default(autoincrement())
+  name         String
+  priceCents   Int?
+  durationSlots Int   @default(1)
+  appointments Appointment[]
+}
+
+model Appointment {
+  id            Int      @id @default(autoincrement())
+  customerName  String
+  customerEmail String
+  customerPhone String
+  serviceId     Int
+  service       Service  @relation(fields: [serviceId], references: [id])
+  date          DateTime
+  startTime     String   // HH:mm
+  partySize     Int
+  slotsBooked   String   // horários reservados separados por vírgula
+  notes         String?
+  status        String   @default("booked")
+  createdAt     DateTime @default(now())
+}
+
+model Block {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  startTime String   // HH:mm
+  endTime   String   // HH:mm
+  reason    String?
+  createdAt DateTime @default(now())
+}
+
+model OtpCode {
+  id        Int      @id @default(autoincrement())
+  email     String
+  codeHash  String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  consumed  Boolean  @default(false)
 }
