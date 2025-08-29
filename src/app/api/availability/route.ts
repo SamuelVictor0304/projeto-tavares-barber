@@ -52,8 +52,8 @@ export async function GET(req: NextRequest) {
   });
   // Função para verificar se slots consecutivos estão livres
   function isAvailable(startTime: string) {
-    let slots = [];
-    let [h, m] = startTime.split(':').map(Number);
+    const slots = [];
+    const [h, m] = startTime.split(':').map(Number);
     for (let i = 0; i < partySize; i++) {
       const slot = format(addMinutes(new Date(date + 'T' + startTime), i * SLOT_DURATION), 'HH:mm');
       slots.push(slot);

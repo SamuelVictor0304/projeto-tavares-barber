@@ -14,7 +14,7 @@ const LAST_START = {
 };
 
 function getSlots(startTime: string, partySize: number, date: string) {
-  let slots = [];
+  const slots = [];
   for (let i = 0; i < partySize; i++) {
     const slot = format(addMinutes(new Date(date + 'T' + startTime), i * SLOT_DURATION), 'HH:mm');
     slots.push(slot);

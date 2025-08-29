@@ -21,8 +21,8 @@ export default function Home() {
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data.blocks)) {
-          const bloqueados = data.blocks.filter((b: any) => b.startTime === "08:00" && b.endTime === "20:30")
-            .map((b: any) => b.date.slice(0, 10));
+          const bloqueados = data.blocks.filter((b: { startTime: string; endTime: string }) => b.startTime === "08:00" && b.endTime === "20:30")
+            .map((b: { date: string }) => b.date.slice(0, 10));
           setDiasBloqueados(bloqueados);
         } else {
           setDiasBloqueados([]);

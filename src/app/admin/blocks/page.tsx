@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function BlocksAdmin() {
   // Proteção de rota: verifica cookie de sessão
@@ -28,7 +28,7 @@ export default function BlocksAdmin() {
   const [msg, setMsg] = useState<string|null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function fetchBlocks() {
+  const fetchBlocks = React.useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/blocks/GET?date=${selectedDate}`);
@@ -39,11 +39,11 @@ export default function BlocksAdmin() {
       setBlocks([]);
     }
     setLoading(false);
-  }
+  }, [selectedDate]);
 
   useEffect(() => {
     fetchBlocks();
-  }, [selectedDate]);
+  }, [fetchBlocks]);
 
   async function handleBlock(e: React.FormEvent) {
     e.preventDefault();

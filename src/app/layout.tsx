@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Link from "next/link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,13 +37,13 @@ export default function RootLayout({
                 <span className="font-bold text-lg text-gray-800">Tavares Barber</span>
               </div>
               <nav className="flex flex-col gap-2">
-                <a href="/" className="py-2 px-3 rounded hover:bg-yellow-100 font-medium text-gray-700">Agendamentos</a>
-                <a href="/novo" className="py-2 px-3 rounded hover:bg-yellow-100 font-medium text-gray-700">Novo Agendamento</a>
-                <a href="/servicos" className="py-2 px-3 rounded hover:bg-yellow-100 font-medium text-gray-700">Serviços</a>
+                <Link href="/" className="py-2 px-3 rounded hover:bg-yellow-100 font-medium text-gray-700">Agendamentos</Link>
+                <Link href="/novo" className="py-2 px-3 rounded hover:bg-yellow-100 font-medium text-gray-700">Novo Agendamento</Link>
+                <Link href="/servicos" className="py-2 px-3 rounded hover:bg-yellow-100 font-medium text-gray-700">Serviços</Link>
                 <div className="mt-6 border-t pt-4">
                   <span className="text-xs text-red-500 font-semibold">ÁREA PRIVADA</span>
-                  <a href="/barbeiro" className="py-2 px-3 rounded hover:bg-red-100 font-medium text-red-600">Área do Barbeiro</a>
-                  <a href="/bloqueios" className="py-2 px-3 rounded hover:bg-red-100 font-medium text-red-600">Bloqueios</a>
+                  <Link href="/barbeiro" className="py-2 px-3 rounded hover:bg-red-100 font-medium text-red-600">Área do Barbeiro</Link>
+                  <Link href="/bloqueios" className="py-2 px-3 rounded hover:bg-red-100 font-medium text-red-600">Bloqueios</Link>
                 </div>
                 <div className="mt-6 border-t pt-4">
                   <span className="text-xs text-yellow-600 font-semibold">ESTATÍSTICAS HOJE</span>

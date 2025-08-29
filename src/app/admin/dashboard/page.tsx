@@ -118,7 +118,7 @@ export default function AdminDashboard() {
             {data?.appointments?.length ? (
               <ul className="divide-y divide-yellow-100">
                 {data.appointments.map((a) => (
-                  <li key={a.id} className="py-4">
+                    <li key={a.id} className="py-4">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                       <div>
                         <span className="font-semibold text-gray-700">{a.nome}</span>
