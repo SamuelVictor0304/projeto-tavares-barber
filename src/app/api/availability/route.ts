@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { startOfDay, endOfDay, format, addMinutes } from 'date-fns';
+import { format, addMinutes } from 'date-fns';
 
 const prisma = new PrismaClient();
 
@@ -8,13 +8,13 @@ const prisma = new PrismaClient();
 const SLOT_DURATION = 40;
 const BUSINESS_START = '09:00';
 const BUSINESS_END = '20:30';
-const WEEKDAYS = [1, 2, 3, 4, 5, 6]; // segunda a sábado
-const LAST_START = {
-  1: '19:40',
-  2: '19:00',
-  3: '18:20',
-  4: '17:40',
-};
+// const WEEKDAYS = [1, 2, 3, 4, 5, 6]; // segunda a sábado
+// const LAST_START = {
+//   1: '19:40',
+//   2: '19:00',
+//   3: '18:20',
+//   4: '17:40',
+// };
 
 function getSlotGrid(partySize: number) {
   // Gera grid de horários iniciais possíveis para o partySize

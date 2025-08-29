@@ -102,7 +102,7 @@ export default function AdminDashboard() {
               <span className="text-sm text-gray-500 mb-2 block text-center">Serviços mais agendados</span>
               <ul className="mt-2 space-y-2">
                 {data?.porServico && Object.keys(data.porServico).length > 0 ? (
-                  Object.entries(data.porServico).map(([nome, info]: any) => (
+                  Object.entries(data.porServico).map(([nome, info]) => (
                     <li key={nome} className="flex justify-between text-yellow-700 font-semibold">
                       <span>{nome}</span>
                       <span className="bg-yellow-100 rounded px-2 py-0.5 text-xs font-bold ml-2">{info.quantidade}</span>

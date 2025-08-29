@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 export default function Home() {
   const [horarios, setHorarios] = useState<string[]>([]);
@@ -149,7 +150,7 @@ export default function Home() {
         {/* Header / Área Privada */}
         <div className="bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-200 rounded-xl shadow-lg p-4 mb-4 flex items-center justify-between border border-yellow-300">
           <div className="flex items-center gap-3">
-            <img src="/favicon.ico" alt="Logo" className="w-10 h-10 rounded-full border border-yellow-500 shadow" />
+            <Image src="/favicon.ico" alt="Logo" width={40} height={40} className="w-10 h-10 rounded-full border border-yellow-500 shadow" />
             <span className="uppercase text-lg font-extrabold tracking-widest text-yellow-900 drop-shadow">Tavares Barber</span>
           </div>
           <div className="flex gap-4 text-yellow-900 font-semibold">

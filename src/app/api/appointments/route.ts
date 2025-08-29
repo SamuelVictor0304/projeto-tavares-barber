@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
       },
     });
     return Response.json({ success: true, appointment });
-  } catch (err) {
+  } catch {
     return Response.json({ error: 'Erro ao criar agendamento.' }, { status: 500 });
   }
 
