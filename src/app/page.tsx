@@ -69,7 +69,7 @@ export default function Home() {
             </div>
             <p className="mt-4 text-lg text-gray-300 italic">
               &quot;O estilo é uma maneira de dizer quem você é sem ter que falar.&quot; - Rachel Zoe
-            </p>
+            </p> 
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
