@@ -15,7 +15,7 @@ export async function DELETE(req: NextRequest) {
       data: { status: 'cancelled' },
     });
     return Response.json({ success: true, appointment });
-  } catch (err) {
+  } catch {
     return Response.json({ error: 'Erro ao cancelar agendamento.' }, { status: 500 });
   }
 }

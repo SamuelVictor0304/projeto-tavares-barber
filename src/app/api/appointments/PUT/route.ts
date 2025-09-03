@@ -17,7 +17,7 @@ export async function PUT(req: NextRequest) {
       data: { ...body },
     });
     return Response.json({ success: true, appointment });
-  } catch (err) {
+  } catch {
     return Response.json({ error: 'Erro ao editar agendamento.' }, { status: 500 });
   }
 }

@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       },
     });
     return Response.json({ success: true, block });
-  } catch (err) {
+  } catch {
     return Response.json({ error: 'Erro ao criar bloqueio.' }, { status: 500 });
   }
 }
@@ -50,7 +50,7 @@ export async function DELETE(req: NextRequest) {
   try {
     await prisma.block.delete({ where: { id: Number(id) } });
     return Response.json({ success: true });
-  } catch (err) {
+  } catch {
     return Response.json({ error: 'Erro ao remover bloqueio.' }, { status: 500 });
   }
 }

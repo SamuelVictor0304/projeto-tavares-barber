@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { addMinutes, format, parse } from 'date-fns';
+import { addMinutes, format } from 'date-fns'; // Removed unused import of parse
 
 const prisma = new PrismaClient();
 
@@ -116,10 +116,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, appointment: newAppointment });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
     // Se o erro for de conflito (lançado por nós), retorna 409
-    if (error.message.includes('já está reservado') || error.message.includes('bloqueado') || error.message.includes('excede o horário')) {
-      return NextResponse.json({ error: error.message }, { status: 409 });
+    if (errorMessage.includes('já está reservado') || errorMessage.includes('bloqueado') || errorMessage.includes('excede o horário')) {
+      return NextResponse.json({ error: errorMessage }, { status: 409 });
     }
     // Outros erros
     console.error("Erro ao criar agendamento:", error);

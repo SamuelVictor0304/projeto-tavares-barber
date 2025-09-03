@@ -68,7 +68,7 @@ export default function Home() {
               />
             </div>
             <p className="mt-4 text-lg text-gray-300 italic">
-              "O estilo é uma maneira de dizer quem você é sem ter que falar." - Rachel Zoe
+              &quot;O estilo é uma maneira de dizer quem você é sem ter que falar.&quot; - Rachel Zoe
             </p>
           </div>
 

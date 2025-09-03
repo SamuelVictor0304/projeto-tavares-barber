@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       },
     });
     return Response.json({ success: true, service });
-  } catch (err) {
+  } catch {
     return Response.json({ error: 'Erro ao criar serviço.' }, { status: 500 });
   }
 }
@@ -47,7 +47,7 @@ export async function PATCH(req: NextRequest) {
       },
     });
     return Response.json({ success: true, service });
-  } catch (err) {
+  } catch {
     return Response.json({ error: 'Erro ao atualizar serviço.' }, { status: 500 });
   }
 }
@@ -62,7 +62,7 @@ export async function DELETE(req: NextRequest) {
   try {
     await prisma.service.delete({ where: { id: Number(id) } });
     return Response.json({ success: true });
-  } catch (err) {
+  } catch {
     return Response.json({ error: 'Erro ao remover serviço.' }, { status: 500 });
   }
 }
