@@ -1,86 +1,128 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { format, addMinutes } from 'date-fns';
+import { addMinutes, format, parse } from 'date-fns';
 
 const prisma = new PrismaClient();
-const SLOT_DURATION = 40;
-const BUSINESS_END = '20:30';
-const WEEKDAYS = [1, 2, 3, 4, 5, 6]; // segunda a sábado
-const LAST_START = {
-  1: '19:40',
-  2: '19:00',
-  3: '18:20',
-  4: '17:40',
-};
 
-function getSlots(startTime: string, partySize: number, date: string) {
-  const slots = [];
+const SLOT_DURATION = 40;
+
+// Gera os slots de 40 minutos que o agendamento ocupará
+function getSlotsForBooking(startTime: string, partySize: number, baseDate: Date): string[] {
+  const slots: string[] = [];
+  const [hours, minutes] = startTime.split(':').map(Number);
+  let currentTime = new Date(baseDate);
+  currentTime.setHours(hours, minutes, 0, 0);
+  
   for (let i = 0; i < partySize; i++) {
-    const slot = format(addMinutes(new Date(date + 'T' + startTime), i * SLOT_DURATION), 'HH:mm');
-    slots.push(slot);
+    slots.push(format(currentTime, 'HH:mm'));
+    currentTime = addMinutes(currentTime, SLOT_DURATION);
   }
   return slots;
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const { customerName, customerEmail, customerPhone, serviceId, date, startTime, partySize, notes } = body;
-  if (!customerName || !customerEmail || !customerPhone || !serviceId || !date || !startTime || !partySize) {
-    return Response.json({ error: 'Campos obrigatórios faltando.' }, { status: 400 });
-  }
-  const weekday = new Date(date).getDay();
-  if (weekday === 0) {
-    return Response.json({ error: 'Domingo indisponível.' }, { status: 400 });
-  }
-  if (partySize < 1 || partySize > 4) {
-    return Response.json({ error: 'Quantidade de pessoas inválida.' }, { status: 400 });
-  }
-  // Verifica se horário inicial é permitido para o partySize
-  const partySizeKey = [1,2,3,4].includes(partySize) ? partySize as 1|2|3|4 : 1;
-  if (startTime > LAST_START[partySizeKey]) {
-    return Response.json({ error: 'Não há slots suficientes até 20:30.' }, { status: 400 });
-  }
-  // Gera slots consecutivos
-  const slots = getSlots(startTime, partySize, date);
-  // Busca agendamentos e bloqueios do dia
-  const appointments = await prisma.appointment.findMany({
-    where: { date: new Date(date), status: 'booked' },
-  });
-  const blocks = await prisma.block.findMany({
-    where: { date: new Date(date) },
-  });
-  // Verifica conflitos
-  for (const slot of slots) {
-    if (appointments.some((a: { slotsBooked: string }) => a.slotsBooked.split(',').includes(slot))) {
-      return Response.json({ error: `Conflito no horário ${slot}. Escolha outro horário.` }, { status: 409 });
-    }
-    if (blocks.some((b: { startTime: string; endTime: string }) => slot >= b.startTime && slot < b.endTime)) {
-      return Response.json({ error: 'Horário indisponível.' }, { status: 409 });
-    }
-    if (slot > BUSINESS_END) {
-      return Response.json({ error: 'Não há slots suficientes até 20:30.' }, { status: 400 });
-    }
-  }
-  // Cria agendamento
   try {
-    const appointment = await prisma.appointment.create({
-      data: {
-        customerName,
-        customerEmail,
-        customerPhone,
-        serviceId,
-        date: new Date(date),
-        startTime,
-        partySize,
-        slotsBooked: slots.join(','),
-        notes,
-        status: 'booked',
-      },
-    });
-    return Response.json({ success: true, appointment });
-  } catch {
-    return Response.json({ error: 'Erro ao criar agendamento.' }, { status: 500 });
-  }
+    const body = await req.json();
+    const { customerName, customerEmail, customerPhone, serviceId, date, startTime, partySize, notes } = body;
 
+    // Validação de entrada
+    if (!customerName || !customerEmail || !customerPhone || !serviceId || !date || !startTime || !partySize) {
+      return NextResponse.json({ error: 'Todos os campos marcados com * são obrigatórios.' }, { status: 400 });
+    }
+    
+    const partySizeNum = parseInt(partySize, 10);
+    if (isNaN(partySizeNum) || partySizeNum < 1 || partySizeNum > 4) {
+        return NextResponse.json({ error: 'Quantidade de pessoas inválida.' }, { status: 400 });
+    }
+
+    const selectedDate = new Date(date + 'T00:00:00');
+    if (isNaN(selectedDate.getTime())) {
+        return NextResponse.json({ error: 'Formato de data inválido.' }, { status: 400 });
+    }
+
+    // Lógica de negócio para verificar a disponibilidade DENTRO de uma transação
+    const newAppointment = await prisma.$transaction(async (tx) => {
+      // 1. Gerar os slots que precisam ser reservados
+      const slotsToBook = getSlotsForBooking(startTime, partySizeNum, selectedDate);
+      const lastSlot = slotsToBook[slotsToBook.length - 1];
+
+      // 2. Verificar se o agendamento termina antes do fim do expediente (21:00)
+      // O último slot começa e dura 40min, então não pode passar de 20:20 para terminar 21:00
+      const [lastHours, lastMinutes] = lastSlot.split(':').map(Number);
+      const lastSlotTime = new Date(selectedDate);
+      lastSlotTime.setHours(lastHours, lastMinutes, 0, 0);
+      
+      const maxEndTime = new Date(selectedDate);
+      maxEndTime.setHours(20, 20, 0, 0);
+      
+      if (lastSlotTime > maxEndTime) {
+          throw new Error('O agendamento excede o horário de funcionamento.');
+      }
+
+      // 3. Verificar conflitos com agendamentos existentes
+      const conflictingAppointments = await tx.appointment.findMany({
+        where: {
+          date: selectedDate,
+          slotsBooked: {
+            // Procura por qualquer agendamento que contenha algum dos slots que queremos reservar
+            contains: slotsToBook[0], // Otimização: podemos checar só o primeiro, mas checar todos é mais seguro
+          },
+        },
+      });
+
+      // Checagem mais detalhada em memória para garantir
+      for (const app of conflictingAppointments) {
+          const existingSlots = app.slotsBooked.split(',');
+          for (const slot of slotsToBook) {
+              if (existingSlots.includes(slot)) {
+                  throw new Error(`O horário ${slot} já está reservado.`);
+              }
+          }
+      }
+
+      // 4. Verificar conflitos com bloqueios
+      const conflictingBlocks = await tx.block.findMany({
+        where: {
+          date: selectedDate,
+          AND: slotsToBook.map(slot => ({
+            startTime: { lte: slot },
+            endTime: { gt: slot },
+          })),
+        },
+      });
+
+      if (conflictingBlocks.length > 0) {
+        throw new Error('Um dos horários selecionados está bloqueado.');
+      }
+
+      // 5. Se não houver conflitos, criar o agendamento
+      const appointment = await tx.appointment.create({
+        data: {
+          customerName,
+          customerEmail,
+          customerPhone,
+          serviceId: Number(serviceId),
+          date: selectedDate,
+          startTime,
+          partySize: partySizeNum,
+          slotsBooked: slotsToBook.join(','),
+          notes,
+          status: 'booked',
+        },
+      });
+
+      return appointment;
+    });
+
+    return NextResponse.json({ success: true, appointment: newAppointment });
+
+  } catch (error: any) {
+    // Se o erro for de conflito (lançado por nós), retorna 409
+    if (error.message.includes('já está reservado') || error.message.includes('bloqueado') || error.message.includes('excede o horário')) {
+      return NextResponse.json({ error: error.message }, { status: 409 });
+    }
+    // Outros erros
+    console.error("Erro ao criar agendamento:", error);
+    return NextResponse.json({ error: 'Não foi possível criar o agendamento.' }, { status: 500 });
   }
-  // Fim do arquivo
+}

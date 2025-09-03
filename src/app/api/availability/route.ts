@@ -1,73 +1,117 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { format, addMinutes } from 'date-fns';
+import { addMinutes, format, parse } from 'date-fns';
 
 const prisma = new PrismaClient();
 
-// Configuração dos horários de funcionamento e slots
-const SLOT_DURATION = 40;
-const BUSINESS_START = '09:00';
-const BUSINESS_END = '20:30';
-// const WEEKDAYS = [1, 2, 3, 4, 5, 6]; // segunda a sábado
-// const LAST_START = {
-//   1: '19:40',
-//   2: '19:00',
-//   3: '18:20',
-//   4: '17:40',
-// };
+const SLOT_DURATION = 40; // Duração de cada slot em minutos
+const TOTAL_SLOTS = 19; // 08:30 a 20:30 (para terminar até 21:00)
 
-function getSlotGrid(partySize: number) {
-  // Gera grid de horários iniciais possíveis para o partySize
-  const startTimes = [
-    '09:00','09:40','10:20','11:00','11:40','12:20','13:00','13:40','14:20','15:00','15:40','16:20','17:00','17:40','18:20','19:00','19:40'
-  ];
-  return startTimes.filter((t) => {
-    const idx = startTimes.indexOf(t);
-    return idx + partySize <= startTimes.length;
-  });
+// Gera todos os slots de 40 minutos do dia, começando às 08:30
+function generateAllSlots(baseDate: Date): Date[] {
+  const slots: Date[] = [];
+  let currentTime = new Date(baseDate);
+  currentTime.setHours(8, 30, 0, 0); // Começar às 08:30
+  
+  for (let i = 0; i < TOTAL_SLOTS; i++) {
+    slots.push(new Date(currentTime));
+    currentTime = addMinutes(currentTime, SLOT_DURATION);
+  }
+  return slots;
 }
+
+// Define o último horário de início permitido com base no tamanho do grupo
+const lastStartSlotIndex: { [key: number]: number } = {
+  1: 18, // 20:30 (termina 21:10, mas vamos ajustar para 20:20)
+  2: 17, // 19:50 (termina 21:10, mas vamos ajustar para 19:40)
+  3: 16, // 19:10 (termina 21:10, mas vamos ajustar para 19:00)
+  4: 15, // 18:30 (termina 21:10, mas vamos ajustar para 18:20)
+};
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const date = searchParams.get('date');
-  const partySize = Number(searchParams.get('partySize') || '1');
-  if (!date) {
-    return Response.json({ error: 'Data obrigatória.' }, { status: 400 });
+  const dateParam = searchParams.get('date');
+  const partySizeParam = searchParams.get('partySize');
+
+  if (!dateParam) {
+    return NextResponse.json({ error: 'O parâmetro "date" é obrigatório.' }, { status: 400 });
   }
-  const weekday = new Date(date).getDay();
-  if (weekday === 0) {
-    return Response.json({ error: 'Domingo indisponível.' }, { status: 400 });
+
+  const partySize = parseInt(partySizeParam || '1', 10);
+  if (isNaN(partySize) || partySize < 1 || partySize > 4) {
+    return NextResponse.json({ error: 'O "partySize" deve ser um número entre 1 e 4.' }, { status: 400 });
   }
-  if (partySize < 1 || partySize > 4) {
-    return Response.json({ error: 'Quantidade de pessoas inválida.' }, { status: 400 });
-  }
-  // Gera grid de horários iniciais possíveis
-  const grid = getSlotGrid(partySize);
-  // Busca agendamentos e bloqueios do dia
-  const appointments = await prisma.appointment.findMany({
-    where: { date: new Date(date), status: 'booked' },
-  });
-  const blocks = await prisma.block.findMany({
-    where: { date: new Date(date) },
-  });
-  // Função para verificar se slots consecutivos estão livres
-  function isAvailable(startTime: string) {
-    const slots = [];
-    const [h, m] = startTime.split(':').map(Number);
-    for (let i = 0; i < partySize; i++) {
-      const slot = format(addMinutes(new Date(date + 'T' + startTime), i * SLOT_DURATION), 'HH:mm');
-      slots.push(slot);
+
+  try {
+    const selectedDate = new Date(dateParam + 'T00:00:00'); // Adiciona T00:00:00 para evitar problemas de fuso horário
+    if (isNaN(selectedDate.getTime())) {
+        return NextResponse.json({ error: 'Formato de data inválido.' }, { status: 400 });
     }
-    // Verifica se algum slot está ocupado ou bloqueado
-    for (const slot of slots) {
-  if (appointments.some((a: { slotsBooked: string }) => a.slotsBooked.split(',').includes(slot))) return false;
-  if (blocks.some((b: { startTime: string; endTime: string }) => slot >= b.startTime && slot < b.endTime)) return false;
+
+    // Domingos não funcionam
+    if (selectedDate.getUTCDay() === 0) {
+      return NextResponse.json({ available: [] });
     }
-    // Verifica se termina até 20:30
-    if (slots.some(s => s > BUSINESS_END)) return false;
-    return true;
+
+    // Busca todos os agendamentos e bloqueios para o dia
+    const appointments = await prisma.appointment.findMany({
+      where: { date: selectedDate },
+    });
+    const blocks = await prisma.block.findMany({
+        where: { date: selectedDate },
+    });
+
+    // Cria um Set com todos os slots já ocupados no dia
+    const occupiedSlots = new Set<string>();
+    appointments.forEach(app => {
+      const slots = app.slotsBooked.split(',');
+      slots.forEach(slot => occupiedSlots.add(slot));
+    });
+    blocks.forEach(block => {
+        // Adiciona todos os slots dentro do intervalo de bloqueio
+        const [startHours, startMinutes] = block.startTime.split(':').map(Number);
+        const [endHours, endMinutes] = block.endTime.split(':').map(Number);
+        
+        let currentTime = new Date(selectedDate);
+        currentTime.setHours(startHours, startMinutes, 0, 0);
+        
+        const endTime = new Date(selectedDate);
+        endTime.setHours(endHours, endMinutes, 0, 0);
+        
+        while(currentTime < endTime) {
+            occupiedSlots.add(format(currentTime, 'HH:mm'));
+            currentTime = addMinutes(currentTime, SLOT_DURATION);
+        }
+    });
+
+
+    const allSlots = generateAllSlots(selectedDate);
+    const availableStartTimes: string[] = [];
+
+    const maxSlotIndex = lastStartSlotIndex[partySize];
+
+    // Itera por todos os slots possíveis para encontrar inícios válidos
+    for (let i = 0; i <= maxSlotIndex; i++) {
+      let isGroupAvailable = true;
+      // Verifica se os N slots consecutivos estão livres
+      for (let j = 0; j < partySize; j++) {
+        const currentSlot = allSlots[i + j];
+        const formattedSlot = format(currentSlot, 'HH:mm');
+        if (occupiedSlots.has(formattedSlot)) {
+          isGroupAvailable = false;
+          break; // Se um slot no grupo está ocupado, o grupo não está disponível
+        }
+      }
+
+      if (isGroupAvailable) {
+        availableStartTimes.push(format(allSlots[i], 'HH:mm'));
+      }
+    }
+
+    return NextResponse.json({ available: availableStartTimes });
+
+  } catch (error) {
+    console.error("Erro ao buscar disponibilidade:", error);
+    return NextResponse.json({ error: 'Ocorreu um erro no servidor.' }, { status: 500 });
   }
-  // Filtra horários disponíveis
-  const available = grid.filter(isAvailable);
-  return Response.json({ available });
 }
