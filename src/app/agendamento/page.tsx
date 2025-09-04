@@ -49,6 +49,7 @@ export default function AgendamentoPage() {
     if (!day) return;
     const date = new Date(year, month, day);
     setSelectedDate(date.toISOString().slice(0, 10));
+    setBloqueioMsg(null); // Limpa mensagem ao trocar de data
   }
 
   function prevMonth() {
@@ -70,6 +71,7 @@ export default function AgendamentoPage() {
   const [obs, setObs] = useState("");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string|null>(null);
+  const [bloqueioMsg, setBloqueioMsg] = useState<string|null>(null);
 
   useEffect(() => {
     fetch("/api/services")
@@ -86,18 +88,43 @@ export default function AgendamentoPage() {
     if (!servico || !selectedDate || !qtdPessoas) {
       setHorarios([]);
       setHorarioSelecionado("");
+      setBloqueioMsg(null);
       return;
     }
+    
+    setBloqueioMsg(null);
+    
     fetch(`/api/availability?serviceId=${servico}&date=${selectedDate}&partySize=${qtdPessoas}`)
       .then(res => res.json())
       .then(data => {
-        if (Array.isArray(data.available)) setHorarios(data.available);
-        else if (Array.isArray(data)) setHorarios(data);
-        else if (Array.isArray(data.slots)) setHorarios(data.slots);
-        else setHorarios([]);
+        if (Array.isArray(data.available)) {
+          setHorarios(data.available);
+          
+          // Se não há horários disponíveis, verificar se é por causa de bloqueios
+          if (data.available.length === 0) {
+            // Verificar se o dia tem bloqueios parciais
+            fetch(`/api/blocks/check?date=${selectedDate}`)
+              .then(res => res.json())
+              .then(blockData => {
+                if (blockData.hasBlocks && !blockData.hasFullDayBlock) {
+                  setBloqueioMsg("Este dia possui horários bloqueados. Por favor, escolha outra data.");
+                }
+              })
+              .catch(() => {});
+          }
+        } else if (Array.isArray(data)) {
+          setHorarios(data);
+        } else if (Array.isArray(data.slots)) {
+          setHorarios(data.slots);
+        } else {
+          setHorarios([]);
+        }
         setHorarioSelecionado("");
       })
-      .catch(() => setHorarios([]));
+      .catch(() => {
+        setHorarios([]);
+        setHorarioSelecionado("");
+      });
   }, [servico, selectedDate, qtdPessoas]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -148,13 +175,13 @@ export default function AgendamentoPage() {
           <div className="bg-black rounded-lg shadow-lg p-6 border border-golden">
             <h3 className="text-xl font-bold text-golden mb-4">1. Escolha a Data</h3>
             <div className="flex items-center justify-between mb-4">
-              <button onClick={prevMonth} className="bg-golden hover:bg-white text-black px-3 py-2 rounded">
+              <button onClick={prevMonth} className="bg-white text-black px-3 py-2 rounded hover:bg-golden transition-colors border border-golden">
                 &lt;
               </button>
               <span className="font-semibold text-golden text-lg">
                 {new Date(year, month).toLocaleString("pt-BR", { month: "long", year: "numeric" })}
               </span>
-              <button onClick={nextMonth} className="bg-golden hover:bg-white text-black px-3 py-2 rounded">
+              <button onClick={nextMonth} className="bg-white text-black px-3 py-2 rounded hover:bg-golden transition-colors border border-golden">
                 &gt;
               </button>
             </div>
@@ -197,6 +224,14 @@ export default function AgendamentoPage() {
           {/* Horários */}
           <div className="bg-black rounded-lg shadow-lg p-6 border border-golden">
             <h3 className="text-xl font-bold text-golden mb-4">2. Escolha o Horário</h3>
+            
+            {/* Mensagem de bloqueio */}
+            {bloqueioMsg && (
+              <div className="mb-4 p-3 bg-yellow-900 border border-yellow-600 rounded text-yellow-200 text-sm">
+                <strong>⚠️ Atenção:</strong> {bloqueioMsg}
+              </div>
+            )}
+            
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {horarios.length > 0 ? horarios.map(h => (
                 <button 
