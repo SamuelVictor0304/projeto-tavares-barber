@@ -72,39 +72,38 @@ export default function Home() {
             </p> 
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Serviço 1 */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {/* Corte de Cabelo */}
             <div className="bg-black p-6 rounded-lg text-center border border-gray-700 hover:border-golden transition-colors">
-              <h3 className="text-2xl font-semibold text-golden mb-4">
-                Corte de Cabelo
-              </h3>
-              <p className="mb-4">
-                Do clássico ao contemporâneo, nossos barbeiros dominam todas as
-                técnicas para um corte perfeito.
+              <div className="text-golden font-bold text-xl mb-2">R$ 35</div>
+              <h3 className="text-2xl font-semibold text-golden mb-4">Corte de Cabelo</h3>
+              <p>
+                Do clássico ao contemporâneo, domino com excelência todas as técnicas de barbearia, garantindo sempre um corte preciso e impecável.
               </p>
-              <div className="text-golden font-bold text-xl">R$ 35</div>
             </div>
-            {/* Serviço 2 */}
+            {/* Barba Tradicional */}
             <div className="bg-black p-6 rounded-lg text-center border border-gray-700 hover:border-golden transition-colors">
-              <h3 className="text-2xl font-semibold text-golden mb-4">
-                Barba Tradicional
-              </h3>
-              <p className="mb-4">
-                A arte da barboterapia com toalha quente, navalha e os melhores
-                produtos para um barbear impecável.
+              <div className="text-golden font-bold text-xl mb-2">R$ 20</div>
+              <h3 className="text-2xl font-semibold text-golden mb-4">Barba Tradicional</h3>
+              <p>
+                A arte da barboterapia com navalha e os melhores produtos para um barbear impecável.
               </p>
-              <div className="text-golden font-bold text-xl">R$ 25</div>
             </div>
-            {/* Serviço 3 */}
+            {/* Combo (Cabelo + Barba) */}
             <div className="bg-black p-6 rounded-lg text-center border border-gray-700 hover:border-golden transition-colors">
-              <h3 className="text-2xl font-semibold text-golden mb-4">
-                Combo (Cabelo + Barba)
-              </h3>
-              <p className="mb-4">
-                A experiência completa para um visual renovado, combinando
-                corte e barba com um preço especial.
+              <div className="text-golden font-bold text-xl mb-2">R$ 50</div>
+              <h3 className="text-2xl font-semibold text-golden mb-4">Combo (Cabelo + Barba)</h3>
+              <p>
+                A experiência completa para um visual renovado, combinando corte e barba com um preço especial.
               </p>
-              <div className="text-golden font-bold text-xl">R$ 50</div>
+            </div>
+            {/* Pigmentação no Cabelo */}
+            <div className="bg-black p-6 rounded-lg text-center border border-gray-700 hover:border-golden transition-colors">
+              <div className="text-golden font-bold text-xl mb-2">R$ 10</div>
+              <h3 className="text-2xl font-semibold text-golden mb-4">Pigmentação no Cabelo</h3>
+              <p>
+                Realce imediato no visual com pigmentação temporária, que valoriza o corte e garante uma estética mais marcada e elegante. Ideal para quem busca destaque e definição extra.
+              </p>
             </div>
           </div>
         </div>

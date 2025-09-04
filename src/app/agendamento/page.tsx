@@ -9,6 +9,7 @@ export default function AgendamentoPage() {
   const [month, setMonth] = useState<number>(today.getMonth());
   const [year, setYear] = useState<number>(today.getFullYear());
   const [diasBloqueados, setDiasBloqueados] = useState<string[]>([]);
+  const [diasComBloqueio, setDiasComBloqueio] = useState<string[]>([]);
 
   useEffect(() => {
     const inicioMes = new Date(year, month, 1).toISOString().slice(0, 10);
@@ -17,14 +18,25 @@ export default function AgendamentoPage() {
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data.blocks)) {
-          const bloqueados = data.blocks.filter((b: { startTime: string; endTime: string }) => b.startTime === "08:00" && b.endTime === "20:30")
-            .map((b: { date: string }) => b.date.slice(0, 10));
-          setDiasBloqueados(bloqueados);
+          // Dias com bloqueio de dia inteiro (08:00 às 20:30)
+          const bloqueadosInteiros = data.blocks.filter((b: { startTime: string; endTime: string }) => 
+            b.startTime === "08:00" && b.endTime === "20:30"
+          ).map((b: { date: string }) => b.date.slice(0, 10));
+          
+          // Dias com qualquer tipo de bloqueio
+          const diasComBloqueio = [...new Set(data.blocks.map((b: { date: string }) => b.date.slice(0, 10)))] as string[];
+          
+          setDiasBloqueados(bloqueadosInteiros);
+          setDiasComBloqueio(diasComBloqueio);
         } else {
           setDiasBloqueados([]);
+          setDiasComBloqueio([]);
         }
       })
-      .catch(() => setDiasBloqueados([]));
+      .catch(() => {
+        setDiasBloqueados([]);
+        setDiasComBloqueio([]);
+      });
   }, [month, year]);
 
   const firstDay = new Date(year, month, 1).getDay();
@@ -152,11 +164,16 @@ export default function AgendamentoPage() {
             <div className="grid grid-cols-7 gap-1">
               {days.map((day, i) => {
                 const dataStr = day ? `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}` : "";
-                const bloqueado = day && diasBloqueados.includes(dataStr);
+                const bloqueadoInteiro = day && diasBloqueados.includes(dataStr);
+                const temBloqueio = day && diasComBloqueio.includes(dataStr);
                 const weekDay = day ? new Date(year, month, day).getDay() : null;
                 const isDomingo = weekDay === 0;
-                const disabled = Boolean(day === null || bloqueado || isDomingo);
+                
+                // Dia é desabilitado se for domingo ou estiver totalmente bloqueado (dia inteiro)
+                // Dias com bloqueios parciais continuam selecionáveis, mas terão horários limitados
+                const disabled = Boolean(day === null || bloqueadoInteiro || isDomingo);
                 const isSelected = day === Number(selectedDate.slice(8, 10)) && month === Number(selectedDate.slice(5, 7)) - 1 && year === Number(selectedDate.slice(0, 4));
+                
                 return (
                   <button
                     key={i}
@@ -166,6 +183,7 @@ export default function AgendamentoPage() {
                       day === null ? "cursor-default" : 
                       disabled ? "bg-gray-800 text-gray-500 cursor-not-allowed" : 
                       isSelected ? "bg-golden text-black" : 
+                      temBloqueio ? "bg-yellow-900 hover:bg-yellow-800 text-yellow-200 border border-yellow-600" : 
                       "bg-gray-800 hover:bg-gray-700 text-white"
                     }`}
                   >
@@ -230,7 +248,7 @@ export default function AgendamentoPage() {
               <textarea value={obs} onChange={e => setObs(e.target.value)} className="w-full p-2 bg-gray-800 border border-gray-700 rounded" rows={3}/>
             </div>
             <div>
-              <button type="submit" disabled={loading || !horarioSelecionado} className="w-full bg-golden text-black font-bold py-3 px-4 rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:bg-white transition-colors">
+              <button type="submit" className="w-full bg-white text-black font-bold py-3 px-4 rounded-md flex items-center justify-center gap-2 hover:bg-golden transition-colors">
                 {loading ? "Agendando..." : "Confirmar Agendamento"}
               </button>
             </div>
