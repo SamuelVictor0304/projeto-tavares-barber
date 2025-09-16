@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma-singleton';
 import { addMinutes, format } from 'date-fns'; // Removed unused import of parse
+import { enviarNotificacaoTelegram } from '@/lib/telegram-notifications';
 
 const SLOT_DURATION = 40;
 
@@ -112,7 +113,32 @@ export async function POST(req: NextRequest) {
       return appointment;
     });
 
-    return NextResponse.json({ success: true, appointment: newAppointment });
+    // 6. Buscar dados do serviço para envio do email
+    const service = await prisma.service.findUnique({
+      where: { id: Number(serviceId) }
+    });
+
+      // 7. Enviar notificação por Telegram para o barbeiro
+      if (service) {
+        const telegramData = {
+          clientName: customerName,
+          clientPhone: customerPhone,
+          clientEmail: customerEmail,
+          serviceName: service.name,
+          datetime: new Date(`${date}T${startTime}:00`),
+          partySize: partySizeNum,
+          notes: notes || undefined
+        };
+
+        // Tentar enviar notificação Telegram (não bloquear se falhar)
+        try {
+          await enviarNotificacaoTelegram(telegramData);
+          console.log('✅ Notificação por Telegram enviada com sucesso');
+        } catch (telegramError) {
+          console.error('⚠️ Falha ao enviar notificação por Telegram:', telegramError);
+          // Não retornar erro - o agendamento já foi criado com sucesso
+        }
+      }    return NextResponse.json({ success: true, appointment: newAppointment });
 
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
