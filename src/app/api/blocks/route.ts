@@ -1,5 +1,7 @@
 import { NextRequest } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 // POST /api/blocks - cria bloqueio de intervalo ou dia inteiro
 export async function POST(req: NextRequest) {

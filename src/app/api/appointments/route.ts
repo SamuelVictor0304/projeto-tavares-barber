@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { PrismaClient } from '@prisma/client';
 import { addMinutes, format } from 'date-fns'; // Removed unused import of parse
+
+const prisma = new PrismaClient();
 
 const SLOT_DURATION = 40;
 

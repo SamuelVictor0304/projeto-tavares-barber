@@ -1,5 +1,7 @@
 import { NextRequest } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 // GET /api/blocks/check?date=YYYY-MM-DD - verifica se um dia específico tem bloqueios
 export async function GET(req: NextRequest) {
