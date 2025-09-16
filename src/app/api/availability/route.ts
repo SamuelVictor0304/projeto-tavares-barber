@@ -22,10 +22,10 @@ function generateAllSlots(baseDate: Date): Date[] {
 
 // Define o último horário de início permitido com base no tamanho do grupo
 const lastStartSlotIndex: { [key: number]: number } = {
-  1: 19, // 20:30 (termina 21:10)
-  2: 18, // 19:50 (termina 21:10)
-  3: 17, // 19:10 (termina 21:10)
-  4: 16, // 18:30 (termina 21:10)
+  1: 18, // 20:30 (termina 21:10, mas vamos ajustar para 20:20)
+  2: 17, // 19:50 (termina 21:10, mas vamos ajustar para 19:40)
+  3: 16, // 19:10 (termina 21:10, mas vamos ajustar para 19:00)
+  4: 15, // 18:30 (termina 21:10, mas vamos ajustar para 18:20)
 };
 
 export async function GET(req: NextRequest) {
