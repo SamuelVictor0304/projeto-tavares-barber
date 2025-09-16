@@ -28,7 +28,10 @@ export async function GET(req: NextRequest) {
       where: {
         date: { gte: start, lte: end },
       },
-      orderBy: { date: 'asc', startTime: 'asc' },
+      orderBy: [
+        { date: 'asc' },
+        { startTime: 'asc' }
+      ],
     });
     return Response.json({ blocks });
   } else {

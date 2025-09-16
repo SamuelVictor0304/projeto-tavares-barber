@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,20 +8,20 @@ datasource db {
 }
 
 model BarberSettings {
-  id                 Int      @id @default(1)
-  shopName           String   @default("Tavares Barber")
-  barberEmail        String   @default("samuel.vsp12@gmail.com")
-  businessHours      Json
-  slotDurationMinutes Int     @default(40)
-  timezone           String   @default("America/Sao_Paulo")
+  id                  Int    @id @default(1)
+  shopName            String @default("Tavares Barber")
+  barberEmail         String @default("samuel.vsp12@gmail.com")
+  businessHours       Json
+  slotDurationMinutes Int    @default(40)
+  timezone            String @default("America/Sao_Paulo")
 }
 
 model Service {
-  id           Int     @id @default(autoincrement())
-  name         String
-  priceCents   Int?
-  durationSlots Int   @default(1)
-  appointments Appointment[]
+  id            Int           @id @default(autoincrement())
+  name          String
+  priceCents    Int?
+  durationSlots Int           @default(1)
+  appointments  Appointment[]
 }
 
 model Appointment {
@@ -33,21 +30,21 @@ model Appointment {
   customerEmail String
   customerPhone String
   serviceId     Int
-  service       Service  @relation(fields: [serviceId], references: [id])
   date          DateTime
-  startTime     String   // HH:mm
+  startTime     String
   partySize     Int
-  slotsBooked   String   // horários reservados separados por vírgula
+  slotsBooked   String
   notes         String?
   status        String   @default("booked")
   createdAt     DateTime @default(now())
+  service       Service  @relation(fields: [serviceId], references: [id])
 }
 
 model Block {
   id        Int      @id @default(autoincrement())
   date      DateTime
-  startTime String   // HH:mm
-  endTime   String   // HH:mm
+  startTime String
+  endTime   String
   reason    String?
   createdAt DateTime @default(now())
 }
