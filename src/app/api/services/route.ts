@@ -3,8 +3,18 @@ import { prisma } from '@/lib/prisma-singleton';
 
 // GET /api/services - lista todos os serviços
 export async function GET() {
-  const services = await prisma.service.findMany();
-  return Response.json({ services });
+  try {
+    console.log('Tentando conectar ao banco...');
+    const services = await prisma.service.findMany();
+    console.log('Serviços encontrados:', services.length);
+    return Response.json({ services });
+  } catch (error) {
+    console.error('Erro na API de serviços:', error);
+    return Response.json({ 
+      error: 'Erro interno do servidor', 
+      details: process.env.NODE_ENV === 'development' ? error : 'Erro de conexão com banco' 
+    }, { status: 500 });
+  }
 }
 
 // POST /api/services - cria novo serviço
