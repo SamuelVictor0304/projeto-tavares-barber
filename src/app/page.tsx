@@ -119,8 +119,8 @@ export default function Home() {
               <h3 className="text-2xl font-semibold text-golden mb-4">
                 Barbearia Tavares
               </h3>
-              <p className="mb-2 text-lg">Rua Principal, 123 - Centro</p>
-              <p className="text-lg">(11) 98765-4321</p>
+              <p className="mb-2 text-lg">Rua 25, 81 Av Comercial- </p>
+              <p className="text-lg">61 9664-4330</p>
             </div>
           </div>
         </div>
