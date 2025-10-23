@@ -173,6 +173,80 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Acesso ao Banco de Dados Section */}
+      <section id="database-access" className="py-12 bg-gray-800 text-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-2xl font-bold text-golden text-center mb-6">
+            🗄️ Acesso ao Banco de Dados
+          </h2>
+          <div className="max-w-3xl mx-auto">
+            <p className="text-center text-gray-300 mb-8">
+              Gerencie e acesse os dados do sistema através das seguintes opções:
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* API Test */}
+              <div className="bg-gray-900 p-6 rounded-lg border border-gray-700 hover:border-golden transition-colors">
+                <h3 className="text-lg font-semibold text-golden mb-3">Teste de Conexão</h3>
+                <p className="text-sm text-gray-400 mb-4">
+                  Verifique o status da conexão com o banco de dados
+                </p>
+                <Link
+                  href="/api/test-db"
+                  target="_blank"
+                  className="inline-block px-4 py-2 bg-golden text-black font-semibold rounded hover:bg-white transition-colors text-sm"
+                >
+                  Testar API
+                </Link>
+              </div>
+
+              {/* Admin Panel */}
+              <div className="bg-gray-900 p-6 rounded-lg border border-gray-700 hover:border-golden transition-colors">
+                <h3 className="text-lg font-semibold text-golden mb-3">Painel Admin</h3>
+                <p className="text-sm text-gray-400 mb-4">
+                  Acesse o painel administrativo para gerenciar agendamentos
+                </p>
+                <Link
+                  href="/admin"
+                  className="inline-block px-4 py-2 bg-golden text-black font-semibold rounded hover:bg-white transition-colors text-sm"
+                >
+                  Acessar Admin
+                </Link>
+              </div>
+
+              {/* Documentation */}
+              <div className="bg-gray-900 p-6 rounded-lg border border-gray-700 hover:border-golden transition-colors">
+                <h3 className="text-lg font-semibold text-golden mb-3">Documentação</h3>
+                <p className="text-sm text-gray-400 mb-4">
+                  Guia completo de acesso ao banco de dados
+                </p>
+                <a
+                  href="https://github.com/SamuelVictor0304/projeto-tavares-barber/blob/main/DATABASE-ACCESS.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block px-4 py-2 bg-golden text-black font-semibold rounded hover:bg-white transition-colors text-sm"
+                >
+                  Ver Docs
+                </a>
+              </div>
+            </div>
+
+            {/* Additional info */}
+            <div className="mt-8 bg-gray-900 p-6 rounded-lg border border-gray-700">
+              <h4 className="text-md font-semibold text-golden mb-3">
+                📋 Informações Técnicas
+              </h4>
+              <ul className="text-sm text-gray-400 space-y-2">
+                <li>• <strong>Banco de Dados:</strong> PostgreSQL via Prisma ORM</li>
+                <li>• <strong>API de Teste:</strong> <code className="bg-gray-800 px-2 py-1 rounded">/api/test-db</code></li>
+                <li>• <strong>Prisma Studio:</strong> Execute <code className="bg-gray-800 px-2 py-1 rounded">npx prisma studio</code> para interface visual</li>
+                <li>• <strong>Documentação Completa:</strong> Consulte o arquivo <code className="bg-gray-800 px-2 py-1 rounded">DATABASE-ACCESS.md</code></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Botão discreto para área administrativa */}
       <div className="text-center py-8">
         <div className="flex justify-center gap-4">
