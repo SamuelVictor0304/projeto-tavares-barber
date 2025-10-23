@@ -1,5 +1,14 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## 🗄️ Database Access
+
+For detailed information on how to access and manage the database, see [DATABASE-ACCESS.md](./DATABASE-ACCESS.md).
+
+Quick access:
+- Test database connection: `/api/test-db`
+- Admin panel: `/admin`
+- Prisma Studio: `npx prisma studio`
+
 ## Getting Started
 
 First, run the development server:
